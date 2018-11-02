@@ -39,11 +39,7 @@ def parse_email_text(lines):
 			break # done reading necessary data. no need to parse through the extra lines
 	return [timestamp, sender_email_address, to_email_addresses, cc_email_addresses]
 
-def load_data():
-	user_email = 'sara.shackleton@enron.com'
-	n_incoming_mails = 4393
-	n_outgoing_mails = 4407
-
+def load_data(user_email):
 	incoming_folders = ['inbox', 'notes_inbox']
 	outgoing_folders = ['sent', 'sent_items']
 
