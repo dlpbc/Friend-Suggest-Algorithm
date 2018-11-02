@@ -1,5 +1,5 @@
 # Friend-Suggest-Algorithm
-Third party implementation of the paper `Suggesting Friends using the Implicit Social Graph` for a user egocentric network. [Link here](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36371.pdf)
+Third party implementation of the paper [Suggesting Friends using the Implicit Social Graph](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36371.pdf) for a user egocentric network. 
 
 # Usage
 ```
