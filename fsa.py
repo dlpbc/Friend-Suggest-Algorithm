@@ -12,6 +12,7 @@ import datetime
 import pprint
 from data_loader import load_data
 import random
+import argparse
 
 def intersecting_group_score(contact, seed, group):
 	s1 = set(group['g_contacts'])
@@ -215,13 +216,13 @@ def is_a_group_in_egocentric_network(G, L):
 			return (group_id, group_info)
 	return None
 
-def main():
+def main(user_email):
 	# Step 1
 	# Load the (user) email dataset
 	# Focus only on email metadata
 	# (timestamp, sender, and recipients)
 	t1 = time.time()
-	user_egocentric_network, user_contacts = load_data()
+	user_egocentric_network, user_contacts = load_data(user_email)
 	t2 = time.time()
 	print('loading user interactions...')
 	print('time taken: {0}'.format(t2-t1))
@@ -293,4 +294,7 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('email_address', help='user email address', type=str)
+	args = parser.parse_args()
+	main(args.email_address)
