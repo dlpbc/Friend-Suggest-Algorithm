@@ -216,7 +216,14 @@ def is_a_group_in_egocentric_network(G, L):
 			return (group_id, group_info)
 	return None
 
-def main(user_email):
+def main(args):
+	user_email = args.email_address
+	recency = args.recency
+	wout = args.wout
+	expand_seed_set_size = args.expand_seed_set_size
+	reduce_seed_set_size = args.reduce_seed_set_size
+	top_k_suggestions = args.top_k_suggestions
+
 	# Step 1
 	# Load the (user) email dataset
 	# Focus only on email metadata
@@ -242,7 +249,7 @@ def main(user_email):
 	print('\n***Computing interaction ranks for all groups...')
 	for group_id in user_egocentric_network.keys():
 		I = {'Iout': user_egocentric_network[group_id]['Iout'], 'Iin': user_egocentric_network[group_id]['Iin']}
-		user_egocentric_network[group_id]['weight'] = interactions_rank(I, recency_weight_decay=5.0, wout=2.0)
+		user_egocentric_network[group_id]['weight'] = interactions_rank(I, recency_weight_decay=recency, wout=wout)
 	
 	print('***Saving interactions rank for all groups to file: `{0}` ...'.format('interactions_rank_output.txt'))
 	with open('interactions_rank_output.txt', 'w') as f:
@@ -254,29 +261,29 @@ def main(user_email):
 	# Run Friend Suggest Algorithm for expanding
 	# initial seed set.
 	print('\n***Friend suggest algorithm for expanding intial seed set of contact')
-	n_contacts_in_seed_set = 2
+	n_contacts_in_seed_set = expand_seed_set_size
 	if n_contacts_in_seed_set > len(user_contacts):
 		print('Error: number of contacts in the initial seed set should be less than total number of user\'s contacts')
 		return
 
 	seed = list(range(len(user_contacts)))
 	random.shuffle(seed)
-	seed = seed[ : n_contacts_in_seed_set] # initally, only 2 contacts in seed set.
+	seed = seed[ : n_contacts_in_seed_set]
 	suggested_contacts = fsa_expand_seed(user_egocentric_network, seed)
 
 	seed = [user_contacts[contact_id] for contact_id in seed]
-	top_ten_suggestions = suggested_contacts[ : 10]
-	top_ten_suggestions = [(user_contacts[contact_id], score) for contact_id, score in top_ten_suggestions]
+	suggestions = suggested_contacts[ : top_k_suggestions]
+	suggestions = [(user_contacts[contact_id], score) for contact_id, score in suggestions]
 	print('seed set: {0}\n'.format(str(seed)))
-	print('top ten suggested contacts: ')
-	pprint.pprint(top_ten_suggestions)
+	print('top {0} suggested contacts: '.format(top_k_suggestions))
+	pprint.pprint(suggestions)
 
 	# Step 4
 	# Run Friend Suggest Algorithm for reducing
 	# initial seed set. (i.e. selecting candidate contacts
 	# in the seed set for removal)
 	print('\n***Friend suggest algorithm for reducing intial seed set of contact')
-	n_contacts_in_seed_set = 7
+	n_contacts_in_seed_set = reduce_seed_set_size
 	if n_contacts_in_seed_set > len(user_contacts):
 		print('Error: number of contacts in the initial seed set should be less than or equal to the total number of user\'s contacts')
 		return
@@ -296,5 +303,10 @@ def main(user_email):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('email_address', help='user email address', type=str)
+	parser.add_argument('-d', '--recency', help='recency weight decay', type=float, default=5.0)
+	parser.add_argument('-w', '--wout', help='weight of relevance of outgoing emails over incoming emails', type=float, default=2.0)
+	parser.add_argument('-x', '--expand_seed_set_size', help='initial seed set size for expand seed', type=int, default=2)
+	parser.add_argument('-k', '--top_k_suggestions', help='top K suggestion to return from expand seed', type=int, default=10)
+	parser.add_argument('-r', '--reduce_seed_set_size', help='initial seed set size for reduce seed', type=int, default=7)
 	args = parser.parse_args()
-	main(args.email_address)
+	main(args)
